@@ -24,9 +24,9 @@ import os
 SEQ_LEN = 256
 DEVICE_BATCH_SIZE = 16
 TOTAL_BATCH_SIZE = SEQ_LEN * DEVICE_BATCH_SIZE
-BUDGET = 600.0                 # seconds of training (10 min)
+BUDGET = 1800.0                # seconds of training (30 min)
 EVAL_STEPS = 40
-SAMPLE_AT = [0.15, 0.5]        # fractions of budget for mid-training samples
+SAMPLE_AT = [0.1, 0.35, 0.65]  # fractions of budget for mid-training samples
 PROMPT = "Once upon a time"
 CKPT = os.path.join(os.path.expanduser("~"), ".cache", "autoresearch", "tinystories", "model.pt")
 
