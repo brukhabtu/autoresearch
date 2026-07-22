@@ -26,8 +26,9 @@ DEVICE_BATCH_SIZE = 16
 TOTAL_BATCH_SIZE = SEQ_LEN * DEVICE_BATCH_SIZE
 BUDGET = 600.0                 # seconds of training (10 min)
 EVAL_STEPS = 40
-SAMPLE_AT = [0.15, 0.5, 1.0]   # fractions of budget to print a sample
+SAMPLE_AT = [0.15, 0.5]        # fractions of budget for mid-training samples
 PROMPT = "Once upon a time"
+CKPT = os.path.join(os.path.expanduser("~"), ".cache", "autoresearch", "tinystories", "model.pt")
 
 DEPTH, DIM, HEADS = 4, 256, 4
 
@@ -176,7 +177,17 @@ def main():
         if step > 2 and total_time >= BUDGET:
             break
 
-    print("\n\nEvaluating on held-out stories...")
+    # Final (best) sample + checkpoint
+    print(f"\n\n--- sample @ 100%  (loss {debiased:.3f}) ---")
+    print(f'"{PROMPT}{sample(model, tokenizer, PROMPT)}"')
+    print("-" * 60)
+    torch.save({"state_dict": model.state_dict(),
+                "config": {"sequence_len": SEQ_LEN, "vocab_size": vocab, "n_layer": DEPTH,
+                           "n_head": HEADS, "n_kv_head": HEADS, "n_embd": DIM, "window_pattern": "L"}},
+               CKPT)
+    print(f"Saved checkpoint -> {CKPT}")
+
+    print("\nEvaluating on held-out stories...")
     val_bpb = evaluate_bpb(model, tokenizer, DEVICE_BATCH_SIZE, SEQ_LEN, EVAL_STEPS)
     print("---")
     print(f"val_bpb:          {val_bpb:.4f}")
